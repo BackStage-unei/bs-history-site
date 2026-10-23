@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'" />
+  <title>BackStage のあゆみ | BackStage</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="hero__eyebrow">HISTORY</p>
+      <h1 class="hero__title">BackStage のあゆみ</h1>
+      <p class="hero__lead">BSter たちが駆け抜けてきた大会と、その記録。</p>
+      <ul class="stats" id="stats"></ul>
+    </header>
+
+    <nav class="tabs" id="tabs" role="tablist" aria-label="表示の切り替え"></nav>
+
+    <section id="panel" class="panel" aria-live="polite"></section>
+
+    <p class="foot" id="foot"></p>
+  </main>
+  <script src="history-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
