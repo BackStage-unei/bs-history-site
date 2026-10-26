@@ -46,18 +46,20 @@
     return wrap;
   }
 
-  // 出来事のサムネイル。リンクがあれば先頭のリンク（イベントページ）へ
-  function evImage(src, links) {
+  // 出来事のサムネイルを、動画カード（ルキチャレの PV など）と同じ大きさのカードにする（画像の文字を隠さないよう印は付けない）。押すと先頭のリンク（イベントページ）へ
+  function eventCard(t, img, links, cls) {
     const first = (links || [])[0];
-    const box = first ? el('a', 'ev__img') : el('span', 'ev__img');
+    const card = first ? el('a', 'vcard vcard--event ' + (cls || '')) : el('div', 'vcard vcard--event ' + (cls || ''));
     if (first) {
-      box.href = first.url;
-      if (new URL(first.url).hostname === 'back-stage.app') box.target = '_top';
-      else { box.target = '_blank'; box.rel = 'noopener'; }
+      card.href = first.url;
+      if (new URL(first.url).hostname === 'back-stage.app') card.target = '_top';
+      else { card.target = '_blank'; card.rel = 'noopener'; }
     }
-    const img = el('img'); img.src = src; img.alt = ''; img.loading = 'lazy';
-    box.append(img);
-    return box;
+    const th = el('span', 'vcard__thumb');
+    const im = el('img'); im.src = img; im.alt = ''; im.loading = 'lazy';
+    th.append(im);
+    card.append(th, el('span', 'vcard__title', t.split(' — ')[0]));
+    return card;
   }
 
   function tag(series) {
@@ -231,7 +233,6 @@
         li.style.setProperty('--c', (D.series[s] || { color: '#ff7aa8' }).color);
         const [y, m] = ym.split('-');
         li.append(el('span', 'ev__ym', `${y}.${Number(m)}`), el('span', 'ev__t', t));
-        if (img) li.append(evImage(img, links));
         if (links && links.length) li.append(evLinks(links));
         ev.append(li);
       });
@@ -241,8 +242,10 @@
         ch.casts.forEach(id => g.append(personEl(id, 's')));
         sec.append(g);
       }
-      if (ch.videos.length) {
+      const evCards = ch.events.filter(e => e[4]);
+      if (ch.videos.length || evCards.length) {
         const strip = el('div', 'ch__videos');
+        evCards.forEach(([, , t, links, img]) => strip.append(eventCard(t, img, links)));
         ch.videos.forEach(v => strip.append(videoCard(v)));
         sec.append(strip);
       }
@@ -412,16 +415,18 @@
         r.events.forEach(e => {
           const it = el('li', 'ev'); it.style.setProperty('--c', (D.series[e.s] || { color: '#c99aff' }).color);
           it.append(el('span', 'ev__t', e.t));
-          if (e.img) it.append(evImage(e.img, e.links));
           if (e.links) it.append(evLinks(e.links));
           ul.append(it);
         });
         body.append(ul);
       }
-      if (r.videos.length) {
+      const evCards = r.events.filter(e => e.img);
+      if (r.videos.length || evCards.length) {
         const vs = el('div', 'mt__videos');
-        r.videos.slice(0, 4).forEach(v => vs.append(videoCard(v, 'vcard--sm')));
-        if (r.videos.length > 4) vs.append(el('span', 'mt__more', `ほか ${r.videos.length - 4}本`));
+        evCards.forEach(e => vs.append(eventCard(e.t, e.img, e.links, 'vcard--sm')));
+        const room = Math.max(0, 4 - evCards.length);
+        r.videos.slice(0, room).forEach(v => vs.append(videoCard(v, 'vcard--sm')));
+        if (r.videos.length > room) vs.append(el('span', 'mt__more', `ほか ${r.videos.length - room}本`));
         body.append(vs);
       }
       if (r.fm.length) {

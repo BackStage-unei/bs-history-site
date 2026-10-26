@@ -263,8 +263,3 @@ html[data-bg='veil'] body { background: var(--veil); }
 .ev__links { grid-column: -2 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
 .ev__link { font-size: .74rem; font-weight: 700; color: var(--text); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; }
 @media (hover: hover) { .ev__link:hover { border-color: var(--c); color: var(--c); } }
-
-/* 出来事のサムネイル（公式サイトのイベント一覧と同じ 16:9） */
-.ev__img { grid-column: -2 / -1; display: block; width: min(100%, 360px); aspect-ratio: 16 / 9; margin-top: 6px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
-.ev__img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s; }
-@media (hover: hover) { a.ev__img:hover img { transform: scale(1.04); } }
