@@ -219,7 +219,7 @@
     return a;
   }
 
-  // ---- ものがたり（章） ----
+  // ---- ストーリー（章） ----
   function renderStory(root) {
     D.story.slice().reverse().forEach((ch, i, arr) => {
       const sec = el('section', 'ch');
@@ -279,7 +279,7 @@
   function openProfile(v, from) {
     openPopup({ cid: v.cast, name: v.guest, bg: v.thumb, eyebrow: 'BackStage FM ゲスト', video: v }, from);
   }
-  // ルキチャレ・ものがたりの人から（FM に出ていればその動画も出す）
+  // ルキチャレ・ストーリーの人から（FM に出ていればその動画も出す）
   function openCast(cid, from) {
     const p = D.people[cid];
     const v = D.fm.find(f => f.cast != null && String(f.cast) === String(cid)) || null;
@@ -505,11 +505,13 @@
   document.getElementById('foot').textContent =
     `通話・登録の数字はアプリの記録から集計（${ay}年${am}月時点・その月は途中まで）。ルーキーチャレンジの結果は公式ハブの確定結果です。`;
 
-  const TABS = [['months', '年表'], ['story', 'ものがたり'], ['rookie', 'ルーキーチャレンジ'], ['fm', 'BackStage FM']];
+  const TABS = [['months', '年表'], ['story', 'ストーリー'], ['rookie', 'ルーキーチャレンジ'], ['fm', 'BackStage FM']];
   const tabs = document.getElementById('tabs');
   const panel = document.getElementById('panel');
-  function show(key) {
-    tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.k === key)));
+  // 切り替えは「今の中身が薄れて消える → 新しい中身がふわっと出る」（style.css の panel-in）。
+  // 連打したときは最後に押したタブだけを描く
+  let showing = null, swapTimer = 0;
+  function render(key) {
     panel.replaceChildren();
     if (key === 'months') renderMonths(panel);
     else if (key === 'story') renderStory(panel);
@@ -517,8 +519,27 @@
     else if (key === 'rookie') renderRookie(panel);
     else if (key === 'fm') renderFM(panel);
     else renderOther(panel, key);
-    try { sessionStorage.setItem('bs-history-tab', key); } catch (e) { /* 保存できなくても動く */ }
   }
+  function show(key) {
+    tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.k === key)));
+    try { sessionStorage.setItem('bs-history-tab', key); } catch (e) { /* 保存できなくても動く */ }
+    if (key === showing) return;
+    const first = showing === null;
+    showing = key;
+    clearTimeout(swapTimer);
+    closeProfile(true);
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (first || still) { render(key); return; }
+    panel.classList.remove('is-entering');
+    panel.classList.add('is-leaving');
+    swapTimer = setTimeout(() => {
+      render(key);
+      panel.classList.remove('is-leaving');
+      void panel.offsetWidth; // 動きを最初からやり直す
+      panel.classList.add('is-entering');
+    }, 150);
+  }
+
   TABS.forEach(([k, label]) => {
     const b = el('button', 'tab', label);
     b.type = 'button'; b.dataset.k = k; b.setAttribute('role', 'tab');
