@@ -263,11 +263,16 @@
   // ---- プロフィールのポップアップ ----
   // 埋め込み（iframe）では高さがページ全体になり画面の中央が分からないので、押したカードの位置に出す
   let modal = null, lastFocus = null;
-  function closeProfile() {
+  // 閉じるときは少しだけ消えていく動き（style.css の pf-out）。別の人を開き直すときは待たずに消す
+  function closeProfile(instant) {
     if (!modal) return;
-    modal.remove(); modal = null;
+    const m = modal; modal = null;
     document.removeEventListener('keydown', onKey);
-    if (lastFocus) lastFocus.focus();
+    if (lastFocus) lastFocus.focus({ preventScroll: true });
+    if (instant === true || matchMedia('(prefers-reduced-motion: reduce)').matches) { m.remove(); return; }
+    m.classList.add('is-closing');
+    m.addEventListener('animationend', () => m.remove(), { once: true });
+    setTimeout(() => m.remove(), 400); // 動きが止められていても必ず消す
   }
   function onKey(e) { if (e.key === 'Escape') closeProfile(); }
   // FM のカードから
@@ -298,7 +303,8 @@
     return out;
   }
   function openPopup(info, from) {
-    closeProfile();
+    closeProfile(true);
+    document.querySelectorAll('.pf-back.is-closing').forEach(e => e.remove());
     lastFocus = from;
     const v = info.video;
     const p = (info.cid != null && D.people[info.cid]) || { icon: null, active: false };

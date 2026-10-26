@@ -227,6 +227,15 @@ a { color: inherit; text-decoration: none; }
 
 /* ---- FM: 通話できる印とプロフィールのポップアップ ---- */
 .vcard__on { position: absolute; left: 8px; top: 8px; font-size: .68rem; font-weight: 800; color: #0b0a10; background: var(--honor); border-radius: 999px; padding: 2px 9px; }
+.pf-back { animation: pf-fade .28s ease-out both; }
+.pf-back .pf { animation: pf-rise .38s cubic-bezier(.2,.8,.25,1) both; }
+.pf-back.is-closing { animation: pf-fade-out .22s ease-in both; pointer-events: none; }
+.pf-back.is-closing .pf { animation: pf-sink .22s ease-in both; }
+@keyframes pf-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pf-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes pf-rise { from { opacity: 0; transform: translateX(-50%) translateY(18px) scale(.96); } to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
+@keyframes pf-sink { from { transform: translateX(-50%) translateY(0) scale(1); } to { transform: translateX(-50%) translateY(10px) scale(.98); } }
+@media (prefers-reduced-motion: reduce) { .pf-back, .pf-back .pf, .pf-back.is-closing, .pf-back.is-closing .pf { animation: none; } }
 .pf-back { position: absolute; left: 0; top: 0; width: 100%; min-height: 100vh; background: rgba(5,4,10,.72); backdrop-filter: blur(3px); z-index: 50; }
 .pf { position: absolute; left: 50%; transform: translateX(-50%); width: min(440px, calc(100% - 32px)); background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius); overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.6); }
