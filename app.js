@@ -32,6 +32,20 @@
     return wrap;
   }
 
+  // 出来事のリンク（イベントページ・X のハッシュタグなど）。行き先は build で検査済み（https・決まったサイトだけ）
+  function evLinks(links) {
+    const wrap = el('span', 'ev__links');
+    (links || []).forEach(l => {
+      const a = el('a', 'ev__link', l.label + ' ↗');
+      a.href = l.url;
+      // 公式サイトのページは STUDIO ごと移動、外のサイトは新しいタブ
+      if (new URL(l.url).hostname === 'back-stage.app') a.target = '_top';
+      else { a.target = '_blank'; a.rel = 'noopener'; }
+      wrap.append(a);
+    });
+    return wrap;
+  }
+
   function tag(series) {
     const s = D.series[series];
     const t = el('span', 'tag', s.name);
@@ -198,11 +212,12 @@
       sec.append(head, el('h2', 'ch__title', ch.title), el('p', 'ch__lead', ch.lead));
       if (ch.source) sec.append(el('p', 'ch__src', '出典: ' + ch.source));
       const ev = el('ul', 'ch__events');
-      ch.events.forEach(([ym, s, t]) => {
+      ch.events.forEach(([ym, s, t, links]) => {
         const li = el('li', 'ev');
         li.style.setProperty('--c', (D.series[s] || { color: '#ff7aa8' }).color);
         const [y, m] = ym.split('-');
         li.append(el('span', 'ev__ym', `${y}.${Number(m)}`), el('span', 'ev__t', t));
+        if (links && links.length) li.append(evLinks(links));
         ev.append(li);
       });
       sec.append(ev);
@@ -379,7 +394,12 @@
       r.marks.forEach(t => body.append(el('span', 'mt__mark', '★ ' + t)));
       if (r.events.length) {
         const ul = el('ul', 'mt__events');
-        r.events.forEach(e => { const it = el('li', 'ev'); it.style.setProperty('--c', (D.series[e.s] || { color: '#c99aff' }).color); it.append(el('span', 'ev__t', e.t)); ul.append(it); });
+        r.events.forEach(e => {
+          const it = el('li', 'ev'); it.style.setProperty('--c', (D.series[e.s] || { color: '#c99aff' }).color);
+          it.append(el('span', 'ev__t', e.t));
+          if (e.links) it.append(evLinks(e.links));
+          ul.append(it);
+        });
         body.append(ul);
       }
       if (r.videos.length) {

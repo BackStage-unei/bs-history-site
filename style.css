@@ -258,3 +258,8 @@ a.person:hover .person__name { color: var(--accent); }
 html[data-bg='clear'], html[data-bg='clear'] body { background: transparent; }
 html[data-bg='veil'] { background: transparent; }
 html[data-bg='veil'] body { background: var(--veil); }
+
+/* 出来事のリンク（イベントページ・X のハッシュタグ） */
+.ev__links { grid-column: -2 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.ev__link { font-size: .74rem; font-weight: 700; color: var(--text); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; }
+@media (hover: hover) { .ev__link:hover { border-color: var(--c); color: var(--c); } }
