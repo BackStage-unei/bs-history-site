@@ -7,6 +7,7 @@
   --bg: #0b0a10; --surface: #16141f; --surface-2: #1e1b2a; --line: #38324c;
   --text: #f5f3f7; --text-sub: #b3acc4; --accent: #c99aff;
   --grad: linear-gradient(100deg, #ff2d78, #8b5cf6 55%, #38bdf8);
+  --veil: rgba(11, 10, 16, 0.80); /* ?bg=veil 用の半透明ベール */
   --gold: #f0c530; --honor: #6cc492; --radius: 20px;
   --font: 'LINE Seed JP', 'Noto Sans JP', sans-serif;
 }
@@ -252,3 +253,8 @@ a.person:hover .person__name { color: var(--accent); }
 .vcard[role='button'] { cursor: pointer; }
 .vcard[role='button']:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
 .pf__off { margin-top: 10px; font-size: .8rem; color: var(--text-sub); }
+
+/* 背景モード（?bg=、埋め込みの中だけ）: clear = 完全透過 / veil = 半透明ベール */
+html[data-bg='clear'], html[data-bg='clear'] body { background: transparent; }
+html[data-bg='veil'] { background: transparent; }
+html[data-bg='veil'] body { background: var(--veil); }

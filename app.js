@@ -2,6 +2,9 @@
 (function () {
   'use strict';
   const D = window.HISTORY_DATA;
+  // 背景モード（埋め込み先に馴染ませる）: ?bg=clear（完全透過） / ?bg=veil（半透明ベール）。埋め込みの中でだけ効く
+  const bgMode = new URLSearchParams(location.search).get('bg');
+  if (window.self !== window.top && (bgMode === 'clear' || bgMode === 'veil')) document.documentElement.dataset.bg = bgMode;
   const FINDER = 'https://back-stage.app/#searching'; // 活動中の人のリンク先（公式サイトのキャスト検索）
 
   function el(tag, cls, text) {
