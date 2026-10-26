@@ -150,7 +150,9 @@ a { color: inherit; text-decoration: none; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .person__name { font-size: .72rem; line-height: 1.25; overflow-wrap: anywhere; }
 .person--l .person__name { font-size: .82rem; font-weight: 700; }
-a.person:hover .person__name { color: var(--accent); }
+.is-btn { cursor: pointer; }
+.person.is-btn:hover .person__name, .crow__p.is-btn:hover .crow__name { color: var(--accent); }
+.is-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 10px; }
 .person.is-off { opacity: .55; }
 .person.is-off .avatar { filter: grayscale(1); }
 .person__off { font-size: .62rem; color: var(--text-sub); }
@@ -237,6 +239,8 @@ a.person:hover .person__name { color: var(--accent); }
 .pf__body { padding: 54px 22px 22px; text-align: center; }
 .pf__eyebrow { font-size: .7rem; letter-spacing: .14em; color: var(--accent); font-weight: 800; }
 .pf__name { font-size: 1.45rem; font-weight: 800; margin-top: 2px; }
+.pf__honors { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.pf__honor { font-size: .72rem; font-weight: 700; color: var(--gold); border: 1px solid var(--gold); border-radius: 999px; padding: 2px 10px; }
 .pf__catch { margin-top: 8px; font-weight: 700; font-size: .95rem; }
 .pf__tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px; }
 .pf__tag { font-size: .72rem; color: var(--text-sub); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }

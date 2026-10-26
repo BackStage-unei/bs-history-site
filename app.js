@@ -7,7 +7,6 @@
   const bgParam = new URLSearchParams(location.search).get('bg');
   const bgMode = ['clear', 'veil', 'solid'].includes(bgParam) ? bgParam : 'clear';
   if (window.self !== window.top && bgMode !== 'solid') document.documentElement.dataset.bg = bgMode;
-  const FINDER = 'https://back-stage.app/#searching'; // 活動中の人のリンク先（公式サイトのキャスト検索）
 
   function el(tag, cls, text) {
     const e = document.createElement(tag);
@@ -21,8 +20,8 @@
   // 人（アイコン＋名前）。活動中ならプロフィールへのリンク、活動終了はリンクなしで薄く
   function personEl(id, size) {
     const p = D.people[id];
-    const wrap = p.active ? el('a', 'person') : el('div', 'person is-off');
-    if (p.active) { wrap.href = FINDER; wrap.target = '_top'; }
+    const wrap = p.active ? el('span', 'person') : el('div', 'person is-off');
+    if (p.active) asCastButton(wrap, id);
     wrap.classList.add('person--' + size);
     const av = el('span', 'avatar');
     if (p.icon) { const img = el('img'); img.src = p.icon; img.alt = ''; av.append(img); }
@@ -173,6 +172,7 @@
     r.top3.forEach((t, i) => {
       const p = D.people[t.id];
       const item = el('span', 'crow__p rank-' + (i + 1));
+      if (p.active) asCastButton(item, t.id);
       const av = el('span', 'avatar avatar--xs');
       if (p.icon) { const img = el('img'); img.src = p.icon; img.alt = ''; av.append(img); }
       else av.append(el('span', 'avatar__ini', p.name.slice(0, 1)));
@@ -270,27 +270,60 @@
     if (lastFocus) lastFocus.focus();
   }
   function onKey(e) { if (e.key === 'Escape') closeProfile(); }
+  // FM のカードから
   function openProfile(v, from) {
+    openPopup({ cid: v.cast, name: v.guest, bg: v.thumb, eyebrow: 'BackStage FM ゲスト', video: v }, from);
+  }
+  // ルキチャレ・ものがたりの人から（FM に出ていればその動画も出す）
+  function openCast(cid, from) {
+    const p = D.people[cid];
+    const v = D.fm.find(f => f.cast != null && String(f.cast) === String(cid)) || null;
+    openPopup({ cid, name: p.name, bg: v ? v.thumb : 'hub/hero.webp', eyebrow: 'BSter', video: v, honors: rookieHonors(cid) }, from);
+  }
+  // ルキチャレの記録（新しい回から）
+  function rookieHonors(cid) {
+    const id = String(cid), out = [];
+    D.rookie.slice().sort((a, b) => b.vol - a.vol).forEach(r => {
+      const won = (r.winners || []).map(String).includes(id);
+      if (r.vol >= 12) {
+        // 達成型の回は順位を付けない（賞の対象と達成だけ）
+        if (won) out.push(`ルキチャレ vol.${r.vol} ${r.vol >= 14 ? 'BP最高得点' : '優勝'}`);
+        else if ((r.lvmax || []).map(String).includes(id)) out.push(`ルキチャレ vol.${r.vol} ${r.vol >= 14 ? 'Lv.MAX' : '30万BP'} 達成`);
+        return;
+      }
+      const k = (r.top3 || []).findIndex(t => String(t.id) === id);
+      if (k === 0 || (k < 0 && won)) out.push(`ルキチャレ vol.${r.vol} 優勝`);
+      else if (k > 0) out.push(`ルキチャレ vol.${r.vol} ${k + 1}位`);
+    });
+    return out;
+  }
+  function openPopup(info, from) {
     closeProfile();
     lastFocus = from;
-    const p = (v.cast != null && D.people[v.cast]) || { icon: null, active: false };
-    const pr = (p.active && D.profiles[v.cast]) || {};
+    const v = info.video;
+    const p = (info.cid != null && D.people[info.cid]) || { icon: null, active: false };
+    const pr = (p.active && D.profiles[info.cid]) || {};
     const back = el('div', 'pf-back');
     back.addEventListener('click', e => { if (e.target === back) closeProfile(); });
     const box = el('div', 'pf');
-    box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', v.guest + ' のプロフィール');
+    box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', info.name + ' のプロフィール');
     const x = el('button', 'pf__close', '×'); x.type = 'button'; x.setAttribute('aria-label', '閉じる');
     x.addEventListener('click', closeProfile);
 
     const head = el('div', 'pf__head');
-    const bg = el('img', 'pf__bg'); bg.src = v.thumb; bg.alt = '';
+    const bg = el('img', 'pf__bg'); bg.src = info.bg; bg.alt = '';
     const av = el('span', 'pf__avatar');
     if (p.icon) { const i = el('img'); i.src = p.icon; i.alt = ''; av.append(i); }
-    else av.append(el('span', 'avatar__ini', v.guest.slice(0, 1)));
+    else av.append(el('span', 'avatar__ini', info.name.slice(0, 1)));
     head.append(bg, av);
 
     const body = el('div', 'pf__body');
-    body.append(el('p', 'pf__eyebrow', 'BackStage FM ゲスト'), el('h3', 'pf__name', v.guest));
+    body.append(el('p', 'pf__eyebrow', info.eyebrow), el('h3', 'pf__name', info.name));
+    if (info.honors && info.honors.length) {
+      const h = el('ul', 'pf__honors');
+      info.honors.forEach(t => h.append(el('li', 'pf__honor', t)));
+      body.append(h);
+    }
     if (pr.catch) body.append(el('p', 'pf__catch', pr.catch));
     if (pr.tags && pr.tags.length) {
       const t = el('div', 'pf__tags');
@@ -300,11 +333,12 @@
     if (pr.intro) body.append(el('p', 'pf__intro', pr.intro));
 
     const acts = el('div', 'pf__acts');
-    if (v.cast != null && !p.active) body.append(el('p', 'pf__off', 'いまは活動していません'));
+    if (info.cid != null && !p.active) body.append(el('p', 'pf__off', 'いまは活動していません'));
     if (pr.app) {
       const call = el('a', 'pf__call', '📞 アプリで通話しにいく'); call.href = pr.app; call.target = '_blank'; call.rel = 'noopener';
       acts.append(call, el('p', 'pf__note', 'アプリが開いて、このキャストのプロフィールが出ます（アプリが無いときはストアへ）'));
     }
+    if (v) {
     const watch = el('a', 'pf__watch');
     watch.href = ytUrl(v.id); watch.target = '_blank'; watch.rel = 'noopener';
     const th = el('span', 'pf__wthumb'); const ti = el('img'); ti.src = v.thumb; ti.alt = ''; th.append(ti, el('span', 'vcard__play', '▶'));
@@ -312,6 +346,7 @@
     wt.append(el('span', 'pf__wlabel', 'FM のインタビューを見る'), el('span', 'pf__wtitle', v.catch.replace(/^【BackStage FM】/, '')));
     watch.append(th, wt);
     acts.append(watch);
+    }
     body.append(acts);
 
     box.append(x, head, body);
@@ -334,6 +369,14 @@
     a.setAttribute('aria-haspopup', 'dialog');
     a.addEventListener('click', e => { e.preventDefault(); openProfile(v, a); });
     a.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProfile(v, a); } });
+  }
+
+  function asCastButton(e, cid) {
+    e.setAttribute('role', 'button'); e.tabIndex = 0;
+    e.setAttribute('aria-haspopup', 'dialog');
+    e.classList.add('is-btn');
+    e.addEventListener('click', ev => { ev.preventDefault(); openCast(cid, e); });
+    e.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCast(cid, e); } });
   }
 
   function renderFM(root) {
