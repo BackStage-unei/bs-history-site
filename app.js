@@ -46,6 +46,20 @@
     return wrap;
   }
 
+  // 出来事のサムネイル。リンクがあれば先頭のリンク（イベントページ）へ
+  function evImage(src, links) {
+    const first = (links || [])[0];
+    const box = first ? el('a', 'ev__img') : el('span', 'ev__img');
+    if (first) {
+      box.href = first.url;
+      if (new URL(first.url).hostname === 'back-stage.app') box.target = '_top';
+      else { box.target = '_blank'; box.rel = 'noopener'; }
+    }
+    const img = el('img'); img.src = src; img.alt = ''; img.loading = 'lazy';
+    box.append(img);
+    return box;
+  }
+
   function tag(series) {
     const s = D.series[series];
     const t = el('span', 'tag', s.name);
@@ -212,11 +226,12 @@
       sec.append(head, el('h2', 'ch__title', ch.title), el('p', 'ch__lead', ch.lead));
       if (ch.source) sec.append(el('p', 'ch__src', '出典: ' + ch.source));
       const ev = el('ul', 'ch__events');
-      ch.events.forEach(([ym, s, t, links]) => {
+      ch.events.forEach(([ym, s, t, links, img]) => {
         const li = el('li', 'ev');
         li.style.setProperty('--c', (D.series[s] || { color: '#ff7aa8' }).color);
         const [y, m] = ym.split('-');
         li.append(el('span', 'ev__ym', `${y}.${Number(m)}`), el('span', 'ev__t', t));
+        if (img) li.append(evImage(img, links));
         if (links && links.length) li.append(evLinks(links));
         ev.append(li);
       });
@@ -397,6 +412,7 @@
         r.events.forEach(e => {
           const it = el('li', 'ev'); it.style.setProperty('--c', (D.series[e.s] || { color: '#c99aff' }).color);
           it.append(el('span', 'ev__t', e.t));
+          if (e.img) it.append(evImage(e.img, e.links));
           if (e.links) it.append(evLinks(e.links));
           ul.append(it);
         });
