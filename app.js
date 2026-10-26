@@ -113,7 +113,7 @@
       el('p', 'hubcard__sub', `全${D.rookie.length}回の記録・参加者のプロフィール・最新回は公式ハブで`),
       el('span', 'hubcard__btn', 'ハブサイトを開く ↗'));
     hub.append(bg, inner);
-    root.append(hub, el('p', 'intro', '回ごとにルールが変わってきたので、時代ごとに分けて載せています。サムネイルを押すと、その回のページが開きます。'));
+    root.append(hub, el('p', 'intro', 'ルールは回ごとに見直してきました。ここでは、同じルールだった回をまとめて並べています。サムネイルを押すと、その回のページが開きます。'));
     D.eras.slice().reverse().forEach(era => {
       const vols = D.rookie.filter(r => r.vol >= era.from && r.vol <= era.to).reverse();
       if (!vols.length) return;
@@ -253,7 +253,7 @@
     });
   }
 
-  // ---- BackStage FM（キャストの素顔に迫るインタビュー） ----
+  // ---- BackStage FM（キャストへのインタビュー番組） ----
   const FM_BY_ID = {};
   D.fm.forEach(v => { FM_BY_ID[v.id] = v; });
   const ytUrl = id => 'https://www.youtube.com/watch?v=' + encodeURIComponent(id);
@@ -338,7 +338,7 @@
 
   function renderFM(root) {
     const live = D.fm.filter(fmActive).length;
-    root.append(el('p', 'intro', `キャストの素顔に迫るインタビュー。これまでに ${D.fm.length} 人が登場しました。押すとプロフィールが開きます。「通話できる」の印がある ${live} 人には、そのままアプリで通話しにいけます。`));
+    root.append(el('p', 'intro', `BackStage REC のインタビュー番組です。これまでに ${D.fm.length} 人のキャストが出ています。カードを押すとプロフィールが開きます。「通話できる」の印がある ${live} 人とは、そこからアプリで通話できます。`));
     const g = el('div', 'fmgrid');
     D.fm.forEach(v => {
       const a = videoCard(v, 'vcard--fm');
